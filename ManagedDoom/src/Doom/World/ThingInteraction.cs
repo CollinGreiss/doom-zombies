@@ -15,6 +15,7 @@
 
 
 
+using ManagedDoom.src.Doom.Event;
 using System;
 
 namespace ManagedDoom
@@ -29,10 +30,6 @@ namespace ManagedDoom
 
 			InitRadiusAttack();
 		}
-
-
-        public event Action<Mobj, Mobj> OnMobKilled;
-        public event Action<Mobj, Mobj> OnMobDamaged;
 
         /// <summary>
         /// Called when the target is killed.
@@ -49,7 +46,7 @@ namespace ManagedDoom
 			target.Flags |= MobjFlags.Corpse | MobjFlags.DropOff;
 			target.Height = new Fixed(target.Height.Data >> 2);
 
-            OnMobKilled?.Invoke( source, target );
+            EventManager.Raise( new MobKilledEvent( source, target ) );
 
             if (source != null && source.Player != null)
 			{
@@ -326,7 +323,7 @@ namespace ManagedDoom
 				}
 			}
 
-            OnMobDamaged?.Invoke( source, target );
+            EventManager.Raise( new MobDamagedEvent( source, target ) );
 
         }
 

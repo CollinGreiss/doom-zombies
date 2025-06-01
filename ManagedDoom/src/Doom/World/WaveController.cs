@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ManagedDoom.src.Doom.Event;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
@@ -85,8 +86,19 @@ namespace ManagedDoom {
                 instaKillStartTime = -instaKillTime;
                 doublePointsStartTime = -doublePointsTime;
 
-                world.ThingInteraction.OnMobKilled += OnMobKilled;
-                world.ThingInteraction.OnMobDamaged += onMobDamaged;
+                EventManager.Subscribe<MobKilledEvent>( e => {
+
+                    var ev = (MobKilledEvent)e;
+                    OnMobKilled( ev.Source, ev.Target );
+
+                } );
+
+                EventManager.Subscribe<MobDamagedEvent>( e => {
+
+                    var ev = (MobDamagedEvent)e;
+                    onMobDamaged( ev.Source, ev.Target );
+
+                } );
 
 
             }
