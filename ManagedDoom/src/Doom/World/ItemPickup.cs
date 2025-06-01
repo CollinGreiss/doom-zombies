@@ -746,19 +746,19 @@ namespace ManagedDoom
                 // Custom Powerups.
 
                 case Sprite.MXAM:
-                world.WaveController.ActivateMaxAmmo();
+                WaveController.Instance.ActivateMaxAmmo();
                 break;
 
                 case Sprite.INSK:
-                world.WaveController.ActivateInstaKill();
+                WaveController.Instance.ActivateInstaKill();
                 break;
 
                 case Sprite.DBPT:
-                world.WaveController.ActivateDoublePoints();
+                WaveController.Instance.ActivateDoublePoints();
                 break;
 
                 case Sprite.NUKE:
-                world.WaveController.ActivateNuke();
+                WaveController.Instance.ActivateNuke();
                 break;
 
 

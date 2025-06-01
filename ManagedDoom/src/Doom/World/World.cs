@@ -17,10 +17,8 @@
 
 using System;
 
-namespace ManagedDoom
-{
-    public sealed partial class World
-    {
+namespace ManagedDoom {
+    public sealed partial class World {
         private GameOptions options;
         private DoomGame game;
         private DoomRandom random;
@@ -46,7 +44,6 @@ namespace ManagedDoom
         private StatusBar statusBar;
         private AutoMap autoMap;
         private Cheat cheat;
-        private WaveController waveController;
 
         private int totalKills;
         private int totalItems;
@@ -65,39 +62,37 @@ namespace ManagedDoom
         // See SubstNullMobj().
         private Mobj dummy;
 
-        public World(GameContent resorces, GameOptions options, DoomGame game, DoomMenu menu)
-        {
+        public World( GameContent resorces, GameOptions options, DoomGame game, DoomMenu menu ) {
             this.options = options;
             this.game = game;
             this.random = options.Random;
 
-            map = new Map(resorces, this);
+            map = new Map( resorces, this );
 
-            thinkers = new Thinkers(this);
-            specials = new Specials(this);
-            thingAllocation = new ThingAllocation(this);
-            thingMovement = new ThingMovement(this);
-            thingInteraction = new ThingInteraction(this);
-            mapCollision = new MapCollision(this);
-            mapInteraction = new MapInteraction(this, menu);
-            pathTraversal = new PathTraversal(this);
-            hitscan = new Hitscan(this);
-            visibilityCheck = new VisibilityCheck(this);
-            sectorAction = new SectorAction(this);
-            playerBehavior = new PlayerBehavior(this);
-            itemPickup = new ItemPickup(this);
-            weaponBehavior = new WeaponBehavior(this);
-            monsterBehavior = new MonsterBehavior(this);
-            lightingChange = new LightingChange(this);
-            statusBar = new StatusBar(this);
-            autoMap = new AutoMap(this);
-            cheat = new Cheat(this);
+            thinkers = new Thinkers( this );
+            specials = new Specials( this );
+            thingAllocation = new ThingAllocation( this );
+            thingMovement = new ThingMovement( this );
+            thingInteraction = new ThingInteraction( this );
+            mapCollision = new MapCollision( this );
+            mapInteraction = new MapInteraction( this, menu );
+            pathTraversal = new PathTraversal( this );
+            hitscan = new Hitscan( this );
+            visibilityCheck = new VisibilityCheck( this );
+            sectorAction = new SectorAction( this );
+            playerBehavior = new PlayerBehavior( this );
+            itemPickup = new ItemPickup( this );
+            weaponBehavior = new WeaponBehavior( this );
+            monsterBehavior = new MonsterBehavior( this );
+            lightingChange = new LightingChange( this );
+            statusBar = new StatusBar( this );
+            autoMap = new AutoMap( this );
+            cheat = new Cheat( this );
 
             options.IntermissionInfo.TotalFrags = 0;
             options.IntermissionInfo.ParTime = 180;
 
-            for (var i = 0; i < Player.MaxPlayerCount; i++)
-            {
+            for ( var i = 0; i < Player.MaxPlayerCount; i++ ) {
                 options.Players[i].KillCount = 0;
                 options.Players[i].SecretCount = 0;
                 options.Players[i].ItemCount = 0;
@@ -113,14 +108,11 @@ namespace ManagedDoom
             LoadThings();
 
             // If deathmatch, randomly spawn the active players.
-            if (options.Deathmatch != 0)
-            {
-                for (var i = 0; i < Player.MaxPlayerCount; i++)
-                {
-                    if (options.Players[i].InGame)
-                    {
+            if ( options.Deathmatch != 0 ) {
+                for ( var i = 0; i < Player.MaxPlayerCount; i++ ) {
+                    if ( options.Players[i].InGame ) {
                         options.Players[i].Mobj = null;
-                        thingAllocation.DeathMatchSpawnPlayer(i);
+                        thingAllocation.DeathMatchSpawnPlayer( i );
                     }
                 }
             }
@@ -136,37 +128,31 @@ namespace ManagedDoom
 
             displayPlayer = options.ConsolePlayer;
 
-            dummy = new Mobj(this);
+            dummy = new Mobj( this );
 
-            options.Music.StartMusic(Map.GetMapBgm(options), true);
+            options.Music.StartMusic( Map.GetMapBgm( options ), true );
 
-            if ( waveController != null ) waveController.Start();
+            if ( options.GameMode == GameMode.Zombies ) WaveController.Instance.Start( this );
 
         }
 
-        public UpdateResult Update()
-        {
+        public UpdateResult Update() {
             var players = options.Players;
 
-            for (var i = 0; i < Player.MaxPlayerCount; i++)
-            {
-                if (players[i].InGame)
-                {
+            for ( var i = 0; i < Player.MaxPlayerCount; i++ ) {
+                if ( players[i].InGame ) {
                     players[i].UpdateFrameInterpolationInfo();
                 }
             }
             thinkers.UpdateFrameInterpolationInfo();
 
-            foreach (var sector in map.Sectors)
-            {
+            foreach ( var sector in map.Sectors ) {
                 sector.UpdateFrameInterpolationInfo();
             }
 
-            for (var i = 0; i < Player.MaxPlayerCount; i++)
-            {
-                if (players[i].InGame)
-                {
-                    playerBehavior.PlayerThink(players[i]);
+            for ( var i = 0; i < Player.MaxPlayerCount; i++ ) {
+                if ( players[i].InGame ) {
+                    playerBehavior.PlayerThink( players[i] );
                 }
             }
 
@@ -176,41 +162,31 @@ namespace ManagedDoom
 
             statusBar.Update();
             autoMap.Update();
-            if (waveController != null) waveController.Update();
+            if ( options.GameMode == GameMode.Zombies ) WaveController.Instance.Update();
 
             levelTime++;
 
-            if (completed)
-            {
+            if ( completed ) {
                 return UpdateResult.Completed;
-            }
-            else
-            {
-                if (doneFirstTic)
-                {
+            } else {
+                if ( doneFirstTic ) {
                     return UpdateResult.None;
-                }
-                else
-                {
+                } else {
                     doneFirstTic = true;
                     return UpdateResult.NeedWipe;
                 }
             }
         }
 
-        private void LoadThings()
-        {
-            for (var i = 0; i < map.Things.Length; i++)
-            {
+        private void LoadThings() {
+            for ( var i = 0; i < map.Things.Length; i++ ) {
                 var mt = map.Things[i];
 
                 var spawn = true;
 
                 // Do not spawn cool, new monsters if not commercial.
-                if (options.GameMode != GameMode.Commercial)
-                {
-                    switch (mt.Type)
-                    {
+                if ( options.GameMode != GameMode.Commercial ) {
+                    switch ( mt.Type ) {
                         case 68: // Arachnotron
                         case 64: // Archvile
                         case 88: // Boss Brain
@@ -221,87 +197,68 @@ namespace ManagedDoom
                         case 65: // Former Human Commando
                         case 66: // Revenant
                         case 84: // Wolf SS
-                            spawn = false;
-                            break;
+                        spawn = false;
+                        break;
                     }
                 }
 
-                if (!spawn)
-                {
+                if ( !spawn ) {
                     break;
                 }
 
-                thingAllocation.SpawnMapThing(mt);
+                thingAllocation.SpawnMapThing( mt );
             }
-
-            if (options.GameMode == GameMode.Zombies ) waveController = new WaveController( this );
         }
 
-        public void ExitLevel()
-        {
+        public void ExitLevel() {
             secretExit = false;
             completed = true;
         }
 
-        public void SecretExitLevel()
-        {
+        public void SecretExitLevel() {
             secretExit = true;
             completed = true;
         }
 
-        public void StartSound(Mobj mobj, Sfx sfx, SfxType type)
-        {
-            options.Sound.StartSound(mobj, sfx, type);
+        public void StartSound( Mobj mobj, Sfx sfx, SfxType type ) {
+            options.Sound.StartSound( mobj, sfx, type );
         }
 
-        public void StartSound(Mobj mobj, Sfx sfx, SfxType type, int volume)
-        {
-            options.Sound.StartSound(mobj, sfx, type, volume);
+        public void StartSound( Mobj mobj, Sfx sfx, SfxType type, int volume ) {
+            options.Sound.StartSound( mobj, sfx, type, volume );
         }
 
-        public void StopSound(Mobj mobj)
-        {
-            options.Sound.StopSound(mobj);
+        public void StopSound( Mobj mobj ) {
+            options.Sound.StopSound( mobj );
         }
 
-        public int GetNewValidCount()
-        {
+        public int GetNewValidCount() {
             validCount++;
             return validCount;
         }
 
-        public bool DoEvent(DoomEvent e)
-        {
-            if (!options.NetGame && !options.DemoPlayback)
-            {
-                cheat.DoEvent(e);
+        public bool DoEvent( DoomEvent e ) {
+            if ( !options.NetGame && !options.DemoPlayback ) {
+                cheat.DoEvent( e );
             }
 
-            if (autoMap.Visible)
-            {
-                if (autoMap.DoEvent(e))
-                {
+            if ( autoMap.Visible ) {
+                if ( autoMap.DoEvent( e ) ) {
                     return true;
                 }
             }
 
-            if (e.Key == DoomKey.Tab && e.Type == EventType.KeyDown)
-            {
-                if (autoMap.Visible)
-                {
+            if ( e.Key == DoomKey.Tab && e.Type == EventType.KeyDown ) {
+                if ( autoMap.Visible ) {
                     autoMap.Close();
-                }
-                else
-                {
+                } else {
                     autoMap.Open();
                 }
                 return true;
             }
 
-            if (e.Key == DoomKey.F12 && e.Type == EventType.KeyDown)
-            {
-                if (options.DemoPlayback || options.Deathmatch == 0)
-                {
+            if ( e.Key == DoomKey.F12 && e.Type == EventType.KeyDown ) {
+                if ( options.DemoPlayback || options.Deathmatch == 0 ) {
                     ChangeDisplayPlayer();
                 }
                 return true;
@@ -310,12 +267,10 @@ namespace ManagedDoom
             return false;
         }
 
-        public void ChangeDisplayPlayer()
-        {
+        public void ChangeDisplayPlayer() {
             displayPlayer++;
-            if (displayPlayer == Player.MaxPlayerCount ||
-                !options.Players[displayPlayer].InGame)
-            {
+            if ( displayPlayer == Player.MaxPlayerCount ||
+                !options.Players[displayPlayer].InGame ) {
                 displayPlayer = 0;
             }
         }
@@ -327,18 +282,14 @@ namespace ManagedDoom
         /// so that we can avoid crash.
         /// This safeguard is imported from Chocolate Doom.
         /// </summary>
-        public Mobj SubstNullMobj(Mobj mobj)
-        {
-            if (mobj == null)
-            {
+        public Mobj SubstNullMobj( Mobj mobj ) {
+            if ( mobj == null ) {
                 dummy.X = Fixed.Zero;
                 dummy.Y = Fixed.Zero;
                 dummy.Z = Fixed.Zero;
                 dummy.Flags = 0;
                 return dummy;
-            }
-            else
-            {
+            } else {
                 return mobj;
             }
         }
@@ -368,28 +319,23 @@ namespace ManagedDoom
         public StatusBar StatusBar => statusBar;
         public AutoMap AutoMap => autoMap;
         public Cheat Cheat => cheat;
-        public WaveController WaveController => waveController;
 
-        public int TotalKills
-        {
+        public int TotalKills {
             get => totalKills;
             set => totalKills = value;
         }
 
-        public int TotalItems
-        {
+        public int TotalItems {
             get => totalItems;
             set => totalItems = value;
         }
 
-        public int TotalSecrets
-        {
+        public int TotalSecrets {
             get => totalSecrets;
             set => totalSecrets = value;
         }
 
-        public int LevelTime
-        {
+        public int LevelTime {
             get => levelTime;
             set => levelTime = value;
         }

@@ -6,6 +6,19 @@ namespace ManagedDoom {
 
     public sealed class WaveController {
 
+        private static WaveController _instance;
+
+        public static WaveController Instance {
+
+            get {
+
+                if ( _instance == null ) _instance = new WaveController();
+                return _instance;
+
+            }
+
+        }
+
         private int wave = 0;
 
         private int monsterSpawnCount = 0;
@@ -49,9 +62,7 @@ namespace ManagedDoom {
 
         private int nukePoints = 25;
 
-
-
-        public WaveController( World world ) {
+        public void Start( World world) {
 
             this.world = world;
 
@@ -65,10 +76,6 @@ namespace ManagedDoom {
                 spawnPoints.Add( thing );
 
             }
-
-        }
-
-        public void Start() {
 
             if (spawnPoints.Count == 0 ) Console.WriteLine( "No spawn points found!" );
 
